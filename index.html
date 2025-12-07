@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Гайды Genshin Impact — Wotpack.ru</title>
+    <title>Гайды Genshin Impact — Поиск по Wotpack.ru</title>
     <style>
         body { 
             font-family: 'Segoe UI', sans-serif; 
@@ -16,7 +16,7 @@
         }
         h1 { font-size: 2.8em; margin-bottom: 10px; text-shadow: 0 0 20px #69ff94; }
         p { font-size: 1.3em; margin-bottom: 40px; opacity: 0.9; }
-        input { 
+        input, select { 
             padding: 18px; 
             width: 90%; 
             max-width: 500px; 
@@ -26,6 +26,7 @@
             outline: none; 
             text-align: center;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            margin: 10px;
         }
         button { 
             margin-top: 20px;
@@ -63,132 +64,112 @@
 </head>
 <body>
     <h1>Гайды Genshin Impact</h1>
-    <p>Введи имя персонажа — получи лучший гайд с Wotpack.ru</p>
+    <p>Введи имя персонажа — найду свежий гайд на Wotpack.ru (через поиск, без 404!)</p>
     
-    <input type="text" id="name" placeholder="Например: Райдэн, Нахида, Ху Тао..." autofocus>
+    <select id="region">
+        <option value="">Все регионы</option>
+        <option value="Мондштадт">Мондштадт</option>
+        <option value="Ли Юэ">Ли Юэ</option>
+        <option value="Инадзума">Инадзума</option>
+        <option value="Сумеру">Сумеру</option>
+        <option value="Фонтейн">Фонтейн</option>
+        <option value="Нод-Край">Нод-Край (новые 2025)</option>
+    </select>
+    
+    <input type="text" id="name" placeholder="Например: Нахида, Райдэн, Ху Тао..." autofocus>
     <br>
     <button onclick="search()">Найти гайд</button>
+    <br>
+    <button onclick="randomSearch()">Случайный гайд</button>
 
     <div id="suggestions" class="suggestions"></div>
 
     <script>
         const chars = {
-            // Мондштадт
-            "амбер": "genshin-impact-bild-na-amber-iz-rubiki-zvezdnyh",
-            "беннет": "genshin-impact-bild-na-benneta-12-go-chlena-gildii-priklyuchenij",
-            "барбара": "genshin-impact-gajd-na-barbaru-bild-i-luchshie-sborki",
-            "диона": "genshin-impact-bild-na-dionu-vedmu-iz-klana-orloj",
-            "джинн": "genshin-impact-bild-na-dzhin-ispolnitelnogo-direktora-rycerov-favoniusa",
-            "эола": "genshin-impact-bild-na-eolu-rycarja-burlivyh-voln",
-            "кайя": "genshin-impact-bild-na-kajyu-rycarja-kopja",
-            "лиза": "genshin-impact-bild-na-lizu-proklyatuju-knigu",
-            "ноэлль": "genshin-impact-bild-na-noel-rycarja-korolyu",
-            "розария": "genshin-impact-bild-na-rozariyu-mstitelnicu",
-            "венти": "genshin-impact-bild-na-venti-odnogo-iz-semi-arhontov",
-            "мона": "genshin-impact-bild-na-monu-astromantiyu-iz-nebesnoj-drevni",
-
-            // Ли Юэ
-            "гань юй": "genshin-impact-bild-na-gan-yuj-77-go-direktora-pohoron-liwana",
-            "ху тао": "genshin-impact-bild-na-hu-tao-77-go-direktora-pohoron-liwana",
-            "кэй цин": "genshin-impact-bild-na-kej-czin-velikij-dvorcovyj-inspektor",
-            "нин гуан": "genshin-impact-bild-na-nin-guan-nebesnuyu-gospozhu",
-            "син цю": "genshin-impact-bild-na-sin-tszju-13-go-chlena-gildii-priklyuchenij",
-            "тальк": "genshin-impact-bild-na-talka-rybaka-iz-chzhuj-cziny",
-            "сяо": "genshin-impact-bild-na-sjao-zaklyatogo-zaschitnika-li-jue",
-            "сяолин": "genshin-impact-bild-na-siang-lin-glavnyj-povarenok-gildii-priklyuchenij",
-            "ян фэй": "genshin-impact-bild-na-yan-fej-yuristku-kotoraya-ne-mozhet-byt-obvinenoj",
-            "чжун ли": "genshin-impact-bild-na-chzhun-li-kontseptsiyu-kamnya",
-            "юнь цзинь": "genshin-impact-bild-na-jun-czin-znamenituju-operu",
-
-            // Инадзума
-            "айяка": "genshin-impact-bild-na-ajjaku-krylatuju-cvetushhuju-ceresu",
-            "гороу": "genshin-impact-bild-na-gorou-generala-patriota",
-            "итто": "genshin-impact-bild-na-itto-arataki-itti",
-            "кава": "genshin-impact-bild-na-kavu-bluzhdajushhego-oblaka",
-            "кокоми": "genshin-impact-bild-na-kokomi-sangonomiju-kokomi",
-            "райдэн": "genshin-impact-bild-na-raidn-shogun-vtorogo-iz-semi-arhontov",
-            "сара": "genshin-impact-bild-na-saru-tenryu-kagunu",
-            "саяка": "genshin-impact-bild-na-sajjaku-kompleksnyj-analiz-situation",
-            "скарамучча": "genshin-impact-bild-na-skaramucchu-6-go-iz-odinnadcati-predvestnikov-fatui",
-            "айято": "genshin-impact-bild-na-ajato-komatsu-ajato",
-            "тору": "genshin-impact-bild-na-toru-elektricheskij-mag",
-            "яэ мико": "genshin-impact-bild-na-jae-miko-svjatyshhennyj-kitsune",
-            "йоимия": "genshin-impact-bild-na-jojimju-feuerwerk-masters",
-
-            // Сумеру
-            "аль-хайтам": "genshin-impact-bild-na-al-hajtama-formu-vyshe-veshhestv",
-            "каveh": "genshin-impact-bild-na-kaveha-bluzhdajushhego-oblaka",
-            "кандакия": "genshin-impact-bild-na-kandak-skolzhenie-po-pustote",
-            "коллеи": "genshin-impact-bild-na-kollej-lazurnyj-kod",
-            "нахида": "nahida-v-genshin-impact-luchshij-bild",
-            "нильоу": "genshin-impact-bild-na-nilou-tancoruju-zvezdu",
-            "сахароза": "genshin-impact-bild-na-saharozu-sladkuju-vesnu",
-            "тигнари": "genshin-impact-bild-na-tignari-lesnogo-dozi",
-            "фарана": "genshin-impact-bild-na-faranu-pustynnyj-ogonj",
-            "дори": "genshin-impact-bild-na-dori-korolevu-zakazov",
-
-            // Фонтейн
-            "арлекино": "arlekino-v-genshin-impact-gajd-bild",
-            "клоринда": "clorinde-v-genshin-impact-luchshij-bild",
-            "линей": "lyney-v-genshin-impact-luchshij-bild",
-            "линетт": "lynette-v-genshin-impact-luchshij-bild",
-            "навия": "navia-v-genshin-impact-luchshij-bild",
-            "невиллет": "neuvillette-v-genshin-impact-luchshij-bild",
-            "сигевинна": "sigewinne-v-genshin-impact-luchshij-bild",
-            "форина": "furina-v-genshin-impact-luchshij-bild",
-            "эмilie": "emilie-v-genshin-impact-luchshij-bild",
-
-            // Нод-Край (новые 2025)
-            "киндерли": "kinich-v-genshin-impact-luchshij-bild",
-            "муалани": "mualani-v-genshin-impact-luchshij-bild",
-            "кионен": "xilonen-v-genshin-impact-luchshij-bild",
-            "маовика": "mavuika-v-genshin-impact-luchshij-bild",
-            "инеффа": "ineffa-v-genshin-impact-luchshij-bild",
-
-            // Другие
-            "бэйдоу": "genshin-impact-bild-na-bejdou-uncennyj-korabl",
-            "дилюк": "genshin-impact-bild-na-diluka-temnyj-rycar",
-            "дэхья": "djehja-v-genshin-impact-luchshij-bild",
-            "кирара": "kirara-v-genshin-impact-luchshij-bild",
-            "лейла": "genshin-impact-bild-na-lejlu-peremennogo-vetra",
-            "мика": "mika-v-genshin-impact-luchshij-bild",
-            "раск": "genshin-impact-bild-na-raska-9-go-iz-odinnadcati-predvestnikov-fatui",
-            "шэнь хэ": "genshin-impact-bild-na-shen-he-oblachnuju-iskryu",
-            "тарталья": "genshin-impact-bild-na-tartalju-odinnadcatogo-iz-odinnadcati-predvestnikov-fatui",
-            "бай чжу": "genshin-impact-bild-na-baj-zhu-zheltyj-znachitel"
+            // Топ-персонажи для автодополнения (из Wotpack 2025)
+            "нахидa": "nahida",
+            "райдэн": "raidn shogun",
+            "форина": "furina",
+            "арлекино": "arlecchino",
+            "невиллет": "neuvillette",
+            "ху тао": "hu tao",
+            "чжун ли": "chzhun li",
+            "яэ мико": "jae miko",
+            "казуха": "kazuhai",
+            "венти": "venti",
+            "аль-хайтам": "al-hajtam",
+            "кирара": "kirara",
+            "кокоми": "kokomi",
+            "айято": "ajato",
+            "скарамучча": "skaramuccha",
+            "тарталья": "tartalja",
+            "дилюк": "diluk",
+            "гань юй": "gan yuj",
+            "сяо": "sjao",
+            "кэй цин": "kej czin",
+            "мона": "mona",
+            "навия": "navia",
+            "линей": "lyney",
+            "линетт": "lynette",
+            "эмilie": "emilie",
+            "клоринда": "clorinde",
+            "сигевинна": "sigewinne",
+            "бай чжу": "baj zhu",
+            "киндерли": "kinich",
+            "мика": "mika",
+            "диона": "diona",
+            "розария": "rozarija",
+            "барбара": "barbara",
+            "ноэлль": "noel",
+            "гороу": "gorou",
+            "коллеи": "kollej",
+            "фарана": "farana",
+            "дори": "dori",
+            "каveh": "kaveh",
+            "лейла": "lejla",
+            "шэнь хэ": "shen he",
+            "итто": "itto",
+            "сахароза": "saharozu",
+            "ян фэй": "jan fej",
+            "йоимия": "jojimja"
         };
 
-        function search() {
-            let input = document.getElementById("name").value.toLowerCase().trim();
-            let found = false;
-            
-            // Нормализация для поиска (ё→е, й→и, etc.)
-            let normalizedInput = input.replace(/ё/g, 'е').replace(/й/g, 'и').replace(/ä/g, 'a');
-            
-            for (let rus in chars) {
-                let normalizedRus = rus.replace(/ё/g, 'е').replace(/й/g, 'и').replace(/ä/g, 'a');
-                // Fuzzy: частичное совпадение или полное
-                if (normalizedRus.includes(normalizedInput) || normalizedInput.includes(normalizedRus.split(' ')[0]) || rus.includes(input)) {
-                    window.location.href = `https://wotpack.ru/${chars[rus]}/`;
-                    found = true;
-                    break;
-                }
-            }
-            
-            if (!found) {
-                // Топ-3 предложения
-                let suggestions = [];
-                for (let rus in chars) {
-                    if (rus.toLowerCase().includes(input) || input.length < 3) {
-                        suggestions.push(rus);
-                    }
-                }
-                let msg = `Гайд на «${input}» не найден :(\nПопробуй: ${suggestions.slice(0,3).join(', ') || 'другое имя'}`;
-                alert(msg);
-            }
+        const regions = {
+            "Мондштадт": "mondstadt",
+            "Ли Юэ": "li jue",
+            "Инадзума": "inadzuma",
+            "Сумеру": "sumeru",
+            "Фонтейн": "fontein",
+            "Нод-Край": "nod-kraj"
+        };
+
+        function getEnglishName(rusName) {
+            return chars[rusName.toLowerCase().trim()] || rusName.toLowerCase().trim();
         }
 
-        // Автодополнение (топ-5)
+        function search() {
+            let input = document.getElementById("name").value.trim();
+            let region = document.getElementById("region").value;
+            if (!input) {
+                alert("Введи имя персонажа!");
+                return;
+            }
+            let engName = getEnglishName(input);
+            let query = `${engName} гайд wotpack.ru`;
+            if (region) {
+                query += ` ${regions[region]}`;
+            }
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        }
+
+        function randomSearch() {
+            let keys = Object.keys(chars);
+            let randomKey = keys[Math.floor(Math.random() * keys.length)];
+            document.getElementById("name").value = randomKey;
+            search();
+        }
+
+        // Автодополнение
         document.getElementById("name").addEventListener("input", function() {
             let input = this.value.toLowerCase().trim();
             let suggestionsDiv = document.getElementById("suggestions");
@@ -234,7 +215,7 @@
     </script>
 
     <footer>
-        Сайт сделан через Termux + GitHub Pages | Обновлено: 07.12.2025 (все URL пофикшены)<br>
+        Сайт сделан через Termux + GitHub Pages | Динамический поиск (без 404!)<br>
         azartworld55-ctrl.github.io — 2025
     </footer>
 </body>
